@@ -37,6 +37,18 @@ export function createTaskRouter(db: Database): Router {
     // 1. Validate request body
     // 2. Call taskService.createTask()
     // 3. Return created task
+    try {
+      const { title, description } = req.body;
+      if (!title) {
+        return res.status(400).json({ error: 'Title is required' });
+      }
+
+      const newTask = await taskService.createTask({ title, description });
+      res.status(201).json(newTask);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create task' });
+    }
+  });
     res.status(501).json({ error: 'Not implemented' });
   });
 
@@ -47,6 +59,19 @@ export function createTaskRouter(db: Database): Router {
     // 2. Call taskService.updateTask()
     // 3. Handle not found case
     // 4. Return updated task
+    router.put('/:id', async (req: Request, res: Response) => {
+    try {
+      const updatedTask = await taskService.updateTask(req.params.id, req.body);
+
+      if (!updatedTask) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+
+      res.json(updatedTask);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update task' });
+    }
+  });
     res.status(501).json({ error: 'Not implemented' });
   });
 
@@ -56,6 +81,22 @@ export function createTaskRouter(db: Database): Router {
     // 1. Call taskService.deleteTask()
     // 2. Handle not found case
     // 3. Return success response
+   router.delete('/:id', async (req: Request, res: Response) => {
+    try {
+      const deleted = await taskService.deleteTask(req.params.id);
+
+      if (!deleted) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete task' });
+    }
+  });
+
+  return router;
+}
     res.status(501).json({ error: 'Not implemented' });
   });
 
